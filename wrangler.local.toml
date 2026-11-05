@@ -1,0 +1,10 @@
+# 只用於「本機開發」的資料庫設定（不會被部署使用）。
+# 線上的 D1 綁定在 Cloudflare 儀表板的 Pages 專案 > Settings > Bindings 設定。
+name = "idiom-quest-local"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "idiom-quest-db"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"

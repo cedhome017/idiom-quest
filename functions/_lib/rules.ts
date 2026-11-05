@@ -13,7 +13,10 @@ export const MAX_SECONDS_PER_LEVEL = 1800;
 export const NICKNAME_MAX = 12;
 
 export function json(data: unknown, status = 200): Response {
-  return Response.json(data, { status, headers: { "Cache-Control": "no-store" } });
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" },
+  });
 }
 
 /** 清理暱稱：移除控制字元、合併空白；回傳 null 代表不合法 */
