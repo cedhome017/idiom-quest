@@ -69,3 +69,68 @@ export async function fetchLeaderboard(scope: Scope, board: Board): Promise<Boar
     return { ok: false, reason: "network" };
   }
 }
+
+/* ---------- 老師後台 ---------- */
+export type AdminRow = {
+  id: number;
+  nickname: string;
+  mode: "level" | "run";
+  level_id: number;
+  points: number;
+  seconds: number;
+  perfect: number;
+  created_at: string;
+};
+
+export type AdminFail = { ok: false; reason: "unauthorized" | "disabled" | "unavailable" | "network" };
+
+export async function adminLogin(
+  password: string
+): Promise<{ ok: true; token: string } | { ok: false; reason: "wrong" | "disabled" | "network" }> {
+  try {
+    const res = await fetch("/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    });
+    if (res.status === 503) return { ok: false, reason: "disabled" };
+    const data = (await res.json().catch(() => null)) as { ok?: boolean; token?: string } | null;
+    if (res.ok && data?.ok && data.token) return { ok: true, token: data.token };
+    if (res.status === 401) return { ok: false, reason: "wrong" };
+    return { ok: false, reason: "network" };
+  } catch {
+    return { ok: false, reason: "network" };
+  }
+}
+
+async function adminCall<T>(token: string, path: string, init?: RequestInit): Promise<({ ok: true } & T) | AdminFail> {
+  try {
+    const res = await fetch(path, {
+      ...init,
+      headers: { ...(init?.headers ?? {}), Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      cache: "no-store",
+    });
+    if (res.status === 401) return { ok: false, reason: "unauthorized" };
+    if (res.status === 503) {
+      const d = (await res.json().catch(() => null)) as { error?: string } | null;
+      return { ok: false, reason: d?.error === "admin_disabled" ? "disabled" : "unavailable" };
+    }
+    const data = (await res.json().catch(() => null)) as ({ ok?: boolean } & T) | null;
+    if (res.ok && data?.ok) return { ...data, ok: true } as { ok: true } & T;
+    return { ok: false, reason: "network" };
+  } catch {
+    return { ok: false, reason: "network" };
+  }
+}
+
+export function adminList(token: string, p: { scope: string; q: string; limit: number; offset: number }) {
+  const qs = new URLSearchParams({ scope: p.scope, q: p.q, limit: String(p.limit), offset: String(p.offset) });
+  return adminCall<{ total: number; rows: AdminRow[] }>(token, `/api/admin/scores?${qs}`);
+}
+
+export function adminDelete(token: string, ids: number[]) {
+  return adminCall<{ deleted: number }>(token, "/api/admin/scores", {
+    method: "DELETE",
+    body: JSON.stringify({ ids }),
+  });
+}

@@ -5,6 +5,7 @@ import { PlayScreen } from "./Play";
 import { HomeScreen } from "./Home";
 import { BetweenScreen, ResultScreen, type Ranks } from "./Result";
 import { BoardScreen } from "./Board";
+import { AdminScreen } from "./Admin";
 import {
   loadProgress,
   saveProgress,
@@ -20,10 +21,15 @@ type Screen =
   | { name: "play"; level: Level; mode: Mode; run: number }
   | { name: "between"; record: LevelRecord; next: Level }
   | { name: "result"; result: Result; retry: () => void; level?: Level }
-  | { name: "board"; scope: Scope; back: Screen };
+  | { name: "board"; scope: Scope; back: Screen }
+  | { name: "admin" };
+
+const isTeacherPath = () => /^\/teacher\/?$/.test(window.location.pathname);
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>({ name: "home" });
+  const [screen, setScreen] = useState<Screen>(() =>
+    isTeacherPath() ? { name: "admin" } : { name: "home" }
+  );
   const [progress, setProgress] = useState<Progress>(() => loadProgress());
   const runCounter = useRef(0);
   const runRecords = useRef<LevelRecord[]>([]);
@@ -35,6 +41,14 @@ export default function App() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [screen.name]);
+
+  // 瀏覽器上一頁／下一頁時，依網址切換後台或首頁
+  useEffect(() => {
+    const onPop = () =>
+      setScreen((cur) => (isTeacherPath() ? { name: "admin" } : cur.name === "admin" ? { name: "home" } : cur));
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   const isUnlocked = (id: number) => id === 1 || (progress[id - 1]?.stars ?? 0) >= 1;
 
@@ -183,6 +197,19 @@ export default function App() {
                 screen
               )
             }
+          />
+        )}
+
+        {screen.name === "admin" && (
+          <AdminScreen
+            onExit={() => {
+              try {
+                window.history.pushState(null, "", "/");
+              } catch {
+                /* 忽略 */
+              }
+              setScreen({ name: "home" });
+            }}
           />
         )}
 

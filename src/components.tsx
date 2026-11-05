@@ -4,11 +4,13 @@ import { Star } from "lucide-react";
 export function ConfirmBar({
   text,
   okLabel,
+  cancelLabel = "繼續",
   onOk,
   onCancel,
 }: {
   text: string;
   okLabel: string;
+  cancelLabel?: string;
   onOk: () => void;
   onCancel: () => void;
 }) {
@@ -32,7 +34,7 @@ export function ConfirmBar({
           onClick={onCancel}
           className="min-h-[48px] flex-1 rounded-xl bg-sky-pale px-3 font-bold"
         >
-          繼續
+          {cancelLabel}
         </button>
       </div>
     </div>
