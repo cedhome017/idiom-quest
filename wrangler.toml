@@ -1,12 +1,6 @@
 name = "idiom-quest"
-main = "worker/index.ts"
 compatibility_date = "2025-01-01"
-
-# 靜態網頁（pnpm build 產生的 dist/）。/api/* 先交給 Worker 處理。
-[assets]
-directory = "./dist"
-binding = "ASSETS"
-run_worker_first = ["/api/*"]
+pages_build_output_dir = "./dist"
 
 # ---- D1 資料庫（排行榜功能需要）----
 # 1. 建立資料庫：  pnpm exec wrangler d1 create idiom-quest-db
@@ -18,6 +12,5 @@ run_worker_first = ["/api/*"]
 # database_id = "貼上你的 database_id"
 # migrations_dir = "migrations"
 
-# 老師後台密碼請用 secret 設定，不要寫在這裡：
-#   pnpm exec wrangler secret put ADMIN_PASSWORD
-# 本機開發請把 ADMIN_PASSWORD 寫在 .dev.vars（已加入 .gitignore）。
+# 老師後台密碼請在 Cloudflare 儀表板（Settings > Variables and Secrets）
+# 新增名為 ADMIN_PASSWORD 的 Secret；本機開發寫在 .dev.vars（已加入 .gitignore）。

@@ -11,9 +11,8 @@
     "build:web": "parcel build index.html --dist-dir dist --no-source-maps",
     "db:migrate:local": "wrangler d1 migrations apply idiom-quest-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply idiom-quest-db --remote",
-    "dev:cf": "pnpm build && wrangler dev",
-    "deploy": "pnpm build && wrangler deploy",
-    "typecheck:worker": "tsc -p worker/tsconfig.json"
+    "dev:cf": "pnpm build && wrangler pages dev",
+    "deploy": "pnpm build && wrangler pages deploy dist --project-name idiom-quest"
   },
   "dependencies": {
     "lucide-react": "^1.69.0",
