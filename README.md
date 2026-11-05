@@ -45,7 +45,4 @@ pnpm dev:cf             # 建置後啟動，http://localhost:8788
 ADMIN_PASSWORD=自訂的測試密碼
 ```
 
-```bash
-```
-
 `wrangler.local.toml` 只用於本機開發。專案刻意沒有 `wrangler.toml`，這樣線上的 D1 綁定才能在儀表板設定。
