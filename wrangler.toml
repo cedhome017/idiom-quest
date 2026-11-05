@@ -1,0 +1,17 @@
+name = "idiom-quest"
+compatibility_date = "2025-01-01"
+pages_build_output_dir = "./dist"
+
+# D1 資料庫綁定。
+# database_id 部署前要換成你自己建立的資料庫 ID：
+#   pnpm exec wrangler d1 create idiom-quest-db
+# 本機開發（--local）不需要真實的 ID。
+[[d1_databases]]
+binding = "DB"
+database_name = "idiom-quest-db"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+# 老師後台密碼請用 secret 設定，不要寫在這裡：
+#   pnpm exec wrangler pages secret put ADMIN_PASSWORD --project-name idiom-quest
+# 本機開發請把 ADMIN_PASSWORD 寫在 .dev.vars（已加入 .gitignore）。
