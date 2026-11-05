@@ -1,32 +1,33 @@
 # 成語闖關（五年級國語）
 
-React + TypeScript + Tailwind 製作的成語闖關網頁，部署在 Cloudflare Pages，成績存放在 Cloudflare D1。
+React + TypeScript + Tailwind 製作的成語闖關網頁，部署在 Cloudflare Workers（靜態資源 + API），成績存放在 Cloudflare D1。
 
 ## 本機開發
 
 ```bash
 pnpm install
-pnpm build              # 建置到 dist/
-pnpm db:migrate:local   # 建立本機 D1 資料表
-pnpm dev:cf             # http://localhost:8788
+pnpm dev:cf             # 建置後以 wrangler dev 啟動，http://localhost:8787
+pnpm db:migrate:local   # 建立本機 D1 資料表（啟用 D1 綁定後）
 ```
 
-## Cloudflare Pages（連結 GitHub 自動部署）設定
+## Cloudflare（連結 GitHub 自動部署）設定
+
+在 Workers & Pages 建立 Worker 並連接這個儲存庫，欄位如下：
 
 | 欄位 | 值 |
 |---|---|
-| Framework preset | None |
 | Build command | `pnpm build` |
-| Build output directory | `dist` |
+| Deploy command | `npx wrangler deploy` |
 | 環境變數 | `NODE_VERSION` = `22`（專案另有 `.node-version`） |
 
-建立專案後，在 Settings 補上：
+第一次部署只含網頁，`/api/health` 會回 `{"ok":true,"db":false}`。
 
-- Bindings → D1 database：變數名稱 `DB`，選 `idiom-quest-db`
-- Variables and Secrets：`ADMIN_PASSWORD`（老師後台密碼，用 Secret）
+## 啟用 D1 資料庫（排行榜需要）
 
-資料表有變動時，另外在自己的電腦執行 `pnpm db:migrate:remote`（Git 推送不會自動套用）。
+1. 在自己的電腦：`pnpm exec wrangler d1 create idiom-quest-db`
+2. 把輸出的 `database_id` 填進 `wrangler.toml`，並取消 `[[d1_databases]]` 區塊的註解
+3. `pnpm db:migrate:remote` 建立資料表
+4. 推送到 GitHub，Cloudflare 會自動重新部署
+5. 老師後台密碼：`pnpm exec wrangler secret put ADMIN_PASSWORD`
 
-## 驗證
-
-部署後打開 `/api/health`，看到 `{"ok":true,...}` 代表網頁與資料庫已接通。
+部署後打開 `/api/health`，看到 `{"ok":true,"db":true,...}` 代表已接通。資料表有變動時，要再執行一次 `pnpm db:migrate:remote`（推送程式碼不會自動套用）。

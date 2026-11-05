@@ -1,17 +1,23 @@
 name = "idiom-quest"
+main = "worker/index.ts"
 compatibility_date = "2025-01-01"
-pages_build_output_dir = "./dist"
 
-# D1 資料庫綁定。
-# database_id 部署前要換成你自己建立的資料庫 ID：
-#   pnpm exec wrangler d1 create idiom-quest-db
-# 本機開發（--local）不需要真實的 ID。
-[[d1_databases]]
-binding = "DB"
-database_name = "idiom-quest-db"
-database_id = "00000000-0000-0000-0000-000000000000"
-migrations_dir = "migrations"
+# 靜態網頁（pnpm build 產生的 dist/）。/api/* 先交給 Worker 處理。
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
+
+# ---- D1 資料庫（排行榜功能需要）----
+# 1. 建立資料庫：  pnpm exec wrangler d1 create idiom-quest-db
+# 2. 把輸出的 database_id 貼到下面，並取消下面 4 行的註解
+# 3. 套用資料表：  pnpm db:migrate:remote
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "idiom-quest-db"
+# database_id = "貼上你的 database_id"
+# migrations_dir = "migrations"
 
 # 老師後台密碼請用 secret 設定，不要寫在這裡：
-#   pnpm exec wrangler pages secret put ADMIN_PASSWORD --project-name idiom-quest
+#   pnpm exec wrangler secret put ADMIN_PASSWORD
 # 本機開發請把 ADMIN_PASSWORD 寫在 .dev.vars（已加入 .gitignore）。
